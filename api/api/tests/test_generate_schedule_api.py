@@ -122,3 +122,59 @@ class TestGenerateScheduleAPI(APITestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertTrue(len(response.data["schedules"]) > 0)
+
+    def test_with_invalid_preference_not_a_list(self):
+        """
+        Testa a geração de horários com 'preference' não sendo uma lista 
+        """
+        body = json.dumps({
+            'preference': "nao-eh-uma-lista",
+            'classes': [self.class_1.id]
+        })
+        
+        response = self.client.post(self.api_url, body, content_type=self.content_type)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data.get('errors'), "preference must be a list of 3 integers")
+
+    def test_classes_none(self):
+        """
+        Testa a geração de horários sem a chave 'classes' no body
+        """
+        body = json.dumps({
+            'preference': [1, 2, 3]
+            # 'classes' está faltando
+        })
+        
+        response = self.client.post(self.api_url, body, content_type=self.content_type)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data.get('errors'), "classes is required and must be a list of integers with at least one element")
+
+    def test_with_invalid_classes_not_a_list(self):
+        """
+        Testa a geração de horários com 'classes' não sendo uma lista 
+        """
+        body = json.dumps({
+            'preference': [1, 2, 3],
+            'classes': "nao-eh-uma-lista"
+        })
+        
+        response = self.client.post(self.api_url, body, content_type=self.content_type)
+        
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data.get('errors'), "classes is required and must be a list of integers with at least one element")
+
+    def test_with_invalid_classes_list_wrong_type(self):
+        """
+        Testa a geração de horários com 'classes' sendo uma lista com tipos inválidos
+        """
+        body = json.dumps({
+            'preference': [1, 2, 3],
+            'classes': [self.class_1.id, "string", self.class_3.id] 
+        })
+        
+        response = self.client.post(self.api_url, body, content_type=self.content_type)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data.get('errors'), "classes is required and must be a list of integers with at least one element")
