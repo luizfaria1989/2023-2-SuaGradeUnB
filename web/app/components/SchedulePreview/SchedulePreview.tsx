@@ -23,6 +23,8 @@ import { errorToast, successToast } from '@/app/utils/toast';
 import jsPDF from 'jspdf';
 import { AxiosError } from 'axios';
 
+import { downloadElementAsPNG } from './downloadUtils';
+
 const commonError = () => errorToast('Houve um erro na atualização das grades!');
 
 function DeleteButton({
@@ -163,19 +165,6 @@ function UploadToCloudButton({ ...props }: {
     );
 }
 
-function handleDownloadPDF(isCloud: boolean, index: number) {
-    const doc = document.getElementById('download-content')!;
-
-    const pdfManager = new jsPDF('l', 'pt', 'a4');
-    pdfManager.html(doc, {
-        callback: function (doc) {
-            doc.save(`schedule-${isCloud ? 'cloud' : 'local'}-${index + 1}.pdf`);
-        },
-        x: 0, y: 0,
-        width: 1150, windowWidth: 2000,
-    });
-}
-
 export default function SchedulePreview({ localSchedule, cloudSchedule, index, position, isCloud = false }: {
     localSchedule?: Array<ScheduleClassType>;
     cloudSchedule?: CloudScheduleType;
@@ -209,10 +198,13 @@ export default function SchedulePreview({ localSchedule, cloudSchedule, index, p
     useEffect(() => {
         if (toDownload && activeScheduleModal) {
             setTimeout(() => {
-                handleDownloadPDF(isCloud, index);
+                downloadElementAsPNG(
+                  'download-content', 
+                  `schedule-${isCloud ? 'cloud' : 'local'}-${index + 1}.png`
+                );
                 setActiveScheduleModal(false);
                 setToDownload(false);
-            }, 75);
+            }, 100); 
         }
     }, [toDownload, activeScheduleModal, isCloud, index]);
 

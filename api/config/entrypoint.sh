@@ -8,10 +8,11 @@ done
 
 echo 'PostgreSQL iniciado'
 
-echo 'Migrando banco de dados...'
-python3 manage.py migrate
+python manage.py migrate
+python manage.py collectstatic --no-input
 
-echo 'Criando usuário admin...'
-python3 manage.py initadmin
+# CORREÇÃO: Trocamos o scraper ao vivo pelo mock
+# python manage.py updatedb
+python manage.py updatemock
 
 exec "$@"
